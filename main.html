@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0" />
+<meta name="description" content="文化庁の「メディア芸術データベース」のSPARQL APIを使ったクイズゲームアプリです。" />
+<!--OGP設定-->
+<meta property="og:site_name" content="メディア芸術DBクイズ" />
+<meta property="og:title" content="メディア芸術DBクイズ" />
+<meta property="og:url" content="https://www.mirko.jp/madb/" />
+<meta property="og:image" content="https://www.mirko.jp/madb/fbimg.jpg" />
+<meta property="og:description" content="文化庁の「メディア芸術データベース」のSPARQL APIを使ったクイズゲームアプリです。" />
+<meta property="og:type" content="website" />
+<!--Twitter Card設定-->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@catfishm2">
+<meta name="twitter:creator" content="@catfishm2">
+<meta name="twitter:url" content="https://www.mirko.jp/madb/" />
+<meta name="twitter:title" content="メディア芸術DBクイズ" />
+<meta name="twitter:description" content="文化庁の「メディア芸術データベース」のSPARQL APIを使ったクイズゲームアプリです。">
+<meta name="twitter:image:src" content="https://www.mirko.jp/madb/fbimg.jpg">
+<title>メディア芸術DBクイズ</title> 
+<style type="text/css">
+
+</style>
+<link rel="stylesheet" type="text/css" href="style.css">
+<script type="text/javascript" src="gameGenreArr.js"></script>
+<script type="text/javascript" src="getMangaQuiz.js"></script>
+<script type="text/javascript" src="getAnimeQuiz.js"></script>
+<script type="text/javascript" src="getGameQuiz.js"></script>
+<script type="text/javascript" src="common.js"></script>
+<script type="text/javascript" src="repeatComment.js"></script>
+<script>
+
+//グローバル変数
+let resultStr = "" ;   // 全ての会話をためる変数（積み重ね）
+let startFlag = 0;     // 0:初期状態　1:自分の回答ターン　2:勝負がついた　3:メデ美が問い合わせ中　4:クイズジャンルの選択フェーズ
+let stopRepeat = 0;    // 0:初期状態（定型文リピート）　1:定形文リピートをストップ
+let scrollPoint = 0;   // 会話ごとに一番下にスクロールする関数で使う（積み重ね）
+let mondaiNum = 7 ; //設問の数
+let kaitouNum = 0 ; //回答の番号（初期値は0）
+let seikaiMessage = "" ; //正解メッセージ
+let questionNum = 1 ; //今何問目か
+let seikaiNum = 0; //正答数
+let quizGenre = 0; //クイズジャンル　初期値０　1:マンガ  2:アニメ　3:ゲーム　4:ミックス
+let randomGenre = Math.floor( Math.random() * 3 ) + 1 ; // random の数が答え
+let quizGenreFlag ;
+if(randomGenre == 1){
+	quizGenreFlag = "M";
+}else if(randomGenre == 2){
+	quizGenreFlag = "A";
+}else{
+	quizGenreFlag = "G";
+}
+///////////////////////////////  ここからスタート  /////////////////////////////////
+window.addEventListener("load",startMessage,false); 
+
+function startMessage(){
+	getMaxNumForGame(); //最大値を取得
+	getMaxNumForManga(); //最大値を取得
+	getMaxNumForAnime(); //最大値を取得
+	setTimeout(function () {
+		resultStr += "<span class='shiri'>メデ美</span>：<b>メディア芸術DBクイズ</b> AIアシスタントの <span style='color:red;font-weight:bold;'>メデ美</span> です　よろしくっす！<br>" ;
+		document.getElementById("results").innerHTML = resultStr; 
+		scroll();
+		setTimeout(function () {
+			resultStr += "<span class='shiri'>メデ美</span>：このクイズは、文化庁の<a href='https://mediag.bunka.go.jp/madb_lab/' target='_blank'><b>メディア芸術データベース・ラボ</b></a>の SPARQL API を利用しています<br>" ;
+			document.getElementById("results").innerHTML = resultStr; 
+			scroll();
+				
+			setTimeout(function () {
+				resultStr += "<span class='shiri'>メデ美</span>：クイズするときは <b>クイズ</b> って言ってね<br>" ;
+				document.getElementById("results").innerHTML = resultStr; 
+				scroll();
+				repeatMassage(); //リピートメッセージに続く
+			}, "1000");
+		}, "1000");
+	}, "1000");
+}
+//スタートつづき（定形メッセージ）
+function repeatMassage(){
+	let randomComment;
+	let myWord = "";
+	const messageCount = comment.length ; // repeatComment.js 参照（コメントの配列数）
+	let repeat = setInterval(function(){
+		if(stopRepeat === 1){
+			clearInterval(repeat);
+			return;
+		}
+		randomComment = Math.floor( Math.random() * messageCount );
+		myWord = document.getElementById('txt1').value;
+		resultStr += "<span class='shiri'>メデ美</span>：" + comment[randomComment] + "<br>" ;
+		document.getElementById("results").innerHTML = resultStr ; 
+		scroll();
+	}, 10000); /////★★★★★★★★　ここを変更して会話スピードを調整　★★★★★★★★
+}
+
+//テキストボックスでエンターキーを押したときの処理
+function enter(){
+	if( window.event.keyCode == 13 ){ //13はエンターキーのコード
+		getMyWord();
+	}
+}
+function getMyWord() { 
+	let str = document.getElementById('txt1').value; //テキストボックスから取得 
+	document.getElementById('txt1').value = ""; //テキストボックスをクリア
+	
+	//　①クイズをスタートさせるワードだった場合
+	if((startFlag == 0 || startFlag == 2) && (str.match(/クイズ/) || str.match(/ｸｲｽﾞ/) || str.match(/くいず/) || str.match(/kuizu/) )){
+		stopRepeat = 1; //リピートをストップ（※以下このあたりしつこくストップしないとタイミングによって止まらないことがある）
+		resultStr += "<span class='anata'>あなた</span>：" + str + "<br>" ; //「クイズ」と言う
+		document.getElementById("results").innerHTML = resultStr; 
+		scroll();
+		setTimeout(function () {
+			stopRepeat = 1; //リピートをストップ
+			resultStr += "<span class='shiri'>メデ美</span>：何のクイズする？　番号で答えてね<br>　　1 --- マンガのクイズ<br>　　2 --- アニメのクイズ<br>　　3 --- ゲームのクイズ<br>　　4 --- マンガ・アニメ・ゲームのミックスクイズ<br>" ;
+			document.getElementById("results").innerHTML = resultStr; 
+			scroll();
+			startFlag = 4; //4:クイズジャンル選択中フラグ
+				
+		}, "1000");
+
+	//  ②クイズをスタートさせる以外のワードだった場合
+	}else if(startFlag == 0 || startFlag == 2){
+		resultStr += "<span class='anata'>あなた</span>：" + str + "<br>" ;
+		document.getElementById("results").innerHTML = resultStr; 
+		scroll();
+		setTimeout(function () {
+			normalMessage(str); //0.8秒後にノーマル応答文を
+			document.getElementById("results").innerHTML = resultStr; 
+			scroll();
+		}, "800");
+
+	//　③クイズジャンルの選択をするフェーズ
+	}else if(startFlag == 4){
+		startFlag = 2; //誤動作防止のため2に
+		resultStr += "<span class='anata'>あなた</span>：" + str + "<br>" ;
+		document.getElementById("results").innerHTML = resultStr; 
+		scroll();
+		setTimeout(function () {
+			if( str.substr(0,1) == "1" || str.substr(0,1) == "１"){
+				resultStr += "<span class='shiri'>メデ美</span>：マンガのクイズね　おっけ～<br>" ;
+				quizGenre = 1
+				callQuiz(quizGenre);
+			}else if( str.substr(0,1) == "2" || str.substr(0,1) == "２"){
+				resultStr += "<span class='shiri'>メデ美</span>：アニメのクイズね　いっくよ～<br>" ;
+				quizGenre = 2
+				callQuiz(quizGenre);
+			}else if( str.substr(0,1) == "3" || str.substr(0,1) == "３"){
+				resultStr += "<span class='shiri'>メデ美</span>：ゲームのクイズね　ガンバロ～<br>" ;
+				quizGenre = 3
+				callQuiz(quizGenre);
+			}else if( str.substr(0,1) == "4" || str.substr(0,1) == "４"){
+				resultStr += "<span class='shiri'>メデ美</span>：ミックスクイズね　気合入れていくよ～<br>" ;
+				quizGenre = 4
+				callQuiz(quizGenre);
+			}else if( str.substr(0,1) == "0" || str.substr(0,1) == "０" ||  str.substr(0,1) == "5" || str.substr(0,1) == "５" ||  str.substr(0,1) == "6" || str.substr(0,1) == "６" ||  str.substr(0,1) == "7" || str.substr(0,1) == "７" ||  str.substr(0,1) == "8" || str.substr(0,1) == "８" ||  str.substr(0,1) == "9" || str.substr(0,1) == "９" ){
+				resultStr += "<span class='shiri'>メデ美</span>：おい、番号は1から4やで<br>" ;
+				startFlag = 4;
+			}else{
+				resultStr += "<span class='shiri'>メデ美</span>：番号で答えてくださいっ！<br>" ;
+				startFlag = 4;
+			}
+			document.getElementById("results").innerHTML = resultStr; 
+			scroll();
+			
+			function callQuiz(quizCallNum){
+				setTimeout(function () {
+				
+					if(quizCallNum == 4){
+						mondaiNum = 10 ;
+					}else{
+						mondaiNum = 7 ;
+					}
+					resultStr += "<span class='shiri'>メデ美</span>：三択問題を" + mondaiNum + "問だすよ　番号で答えてね<br>" ;
+					document.getElementById("results").innerHTML = resultStr; 
+					scroll();
+					setTimeout(function () {
+						stopRepeat = 1; //リピートをストップ
+						if(quizCallNum == 1){
+							startFlag = 3;  //3:AIがクイズ問題問い合わせ中
+							getRandomNum_M(); //マンガスタート
+						}else if(quizCallNum == 2){
+							startFlag = 3;  //3:AIがクイズ問題問い合わせ中
+							getRandomNum_A();   //アニメスタート
+						}else if(quizCallNum == 3){
+							startFlag = 3;  //3:AIがクイズ問題問い合わせ中
+							getRandomNum_G(); //ゲームスタート
+						}else if(quizCallNum == 4){
+							startFlag = 3;  //3:AIがクイズ問題問い合わせ中
+							if(quizGenreFlag == "M"){
+								quizGenreFlag = "A" ;
+								getRandomNum_M();
+							}else if(quizGenreFlag == "A"){
+								quizGenreFlag = "G" ;
+								getRandomNum_A();
+							}else if(quizGenreFlag == "G"){
+								quizGenreFlag = "M" ;
+								getRandomNum_G();
+							}
+						}
+					}, "1000");
+				}, "1000");
+			}
+		}, "1000");
+
+	// ④AIがクイズ問題問い合わせ中のフェーズ
+	}else if(startFlag == 3){
+		resultStr += "<span class='anata'>あなた</span>：" + str + "<br>" ;
+		document.getElementById("results").innerHTML = resultStr; 
+		scroll();
+
+		resultStr += "<span class='shiri'>メデ美</span>：いま考え中。ちょっと黙っといてんか<br>" ;
+		document.getElementById("results").innerHTML = resultStr;
+		scroll();
+			
+	//  ⑤自分が回答するフェーズ
+	}else if(startFlag == 1){
+		resultStr += "<span class='anata'>あなた</span>：" + str + "<br>";
+		document.getElementById("results").innerHTML = resultStr; 
+		scroll();
+		if( str.substr(0,1) == "1" || str.substr(0,1) == "１"  || str.substr(0,1) == "2"  || str.substr(0,1) == "２"  || str.substr(0,1) == "3"  || str.substr(0,1) == "３" ){
+			startFlag = 3;
+			setTimeout(function () {
+				const ansNum = hankaku2Zenkaku(str.substr(0,1)) ; //文字列の左一文字を切り出して半角に
+				if(ansNum == kaitouNum){
+					const randomAns1 = Math.floor( Math.random() * 3 ) + 1 ; //乱数の生成
+					if(randomAns1 == 1){
+						resultStr += "<span class='shiri'>メデ美</span>：<span style='color:red;font-weight:bold;'>〇</span> せいかーい！<br>";
+					}else if(randomAns1 == 2){
+						resultStr += "<span class='shiri'>メデ美</span>：<span style='color:red;font-weight:bold;'>〇</span> せいかいピンポーン！<br>";
+					}else{
+						resultStr += "<span class='shiri'>メデ美</span>：<span style='color:red;font-weight:bold;'>〇</span> 正解ですっ！<br>";
+					}
+						
+					seikaiNum++; //正答を加算
+					document.getElementById("results").innerHTML = resultStr; 
+					scroll();
+				}else{
+					const randomAns2 = Math.floor( Math.random() * 3 ) + 1 ; //乱数の生成
+					if(randomAns2 == 1){
+						resultStr += "<span class='shiri'>メデ美</span>：<span style='color:red;font-weight:bold;'>×</span> ブッブー不正解<br>";
+					}else if(randomAns2 == 2){
+						resultStr += "<span class='shiri'>メデ美</span>：<span style='color:red;font-weight:bold;'>×</span> ざんねんでした～<br>";
+					}else{
+						resultStr += "<span class='shiri'>メデ美</span>：<span style='color:red;font-weight:bold;'>×</span> まちがいでーす<br>";
+					}
+					document.getElementById("results").innerHTML = resultStr; 
+					scroll();
+				}
+				setTimeout(function () {
+					resultStr += "<span class='shiri'>メデ美</span>：" + seikaiMessage + "<br>"; //回答メッセージ
+					document.getElementById("results").innerHTML = resultStr; 
+					scroll();
+					
+					//次の問題へ
+					if(quizGenre == 1){
+						getRandomNum_M();
+					}else if(quizGenre == 2){
+						getRandomNum_A();
+					}else if(quizGenre == 3){
+						getRandomNum_G();
+					}else if(quizGenre == 4){
+						if(quizGenreFlag == "M"){
+							quizGenreFlag = "A" ;
+							getRandomNum_M();
+						}else if(quizGenreFlag == "A"){
+							quizGenreFlag = "G" ;
+							getRandomNum_A();
+						}else if(quizGenreFlag == "G"){
+							quizGenreFlag = "M" ;
+							getRandomNum_G();
+						}
+					}
+				}, "1000");
+			}, "1000");
+		}else if( str.substr(0,1) == "0" || str.substr(0,1) == "０" ||  str.substr(0,1) == "4" || str.substr(0,1) == "４"  ||  str.substr(0,1) == "5" || str.substr(0,1) == "５" ||  str.substr(0,1) == "6" || str.substr(0,1) == "６" ||  str.substr(0,1) == "7" || str.substr(0,1) == "７" ||  str.substr(0,1) == "8" || str.substr(0,1) == "８" ||  str.substr(0,1) == "9" || str.substr(0,1) == "９" ){
+			setTimeout(function () {
+				resultStr += "<span class='shiri'>メデ美</span>： " + str.substr(0,1) + " ね…　それギャグのつもり？　番号は1から3やで<br>";
+				document.getElementById("results").innerHTML = resultStr; 
+				scroll();
+			}, "500");
+		}else{
+			setTimeout(function () {
+				resultStr += "<span class='shiri'>メデ美</span>：番号で答えてくださいっ<br>";
+				document.getElementById("results").innerHTML = resultStr; 
+				scroll();
+			}, "500");
+		}
+	}
+} 
+
+</script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-151390134-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-151390134-1');
+</script>
+</head>
+<body>
+<div class="parent">
+  <div class="header" style="z-index: 40;"><a href="index.html"><img src="face2.png" style="width:80px;vertical-align:-30px;margin-left:20px;"></a>　メディア芸術DBクイズ</div>
+  <div id="inner" class="inner" style="overflow: auto;">
+  
+	<div id="results"></div>
+	<form name="form1" id="id_form1" action="">
+	<div  style="position: absolute; bottom: 10px; z-index: 30;"/>
+	<input type="text" id="txt1" value="" placeholder="入力フォーム" onkeypress="enter();">
+	<input type="text" name="dummy" style="display:none;"><!-- エンターサブミットを無効化するためのダミー -->
+	<input type="button" value="入力" onclick="getMyWord()" style="display:inline;padding:5px 3px 5px 3px;">
+	</div>
+
+	<p style="height:30px;">
+  </div>
+</div>
+</body>
+</html> 

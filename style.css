@@ -1,0 +1,70 @@
+html {
+	word-break: break-all; /*リンクを強制改行する*/
+}
+body {
+	margin:0;
+	font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+	background-color: #ddd;
+	color: #000;
+}
+/********** 全体の枠のスタイル **********/
+.parent{
+	position: relative;
+	margin:0;
+	padding:0;
+	width: 100%;
+}
+.header{
+	width: 800px;
+	height: 80px;
+	margin: auto;
+	background-color: #CEF9DC;
+	font-size:150%;
+}
+.inner{
+	width: 800px;
+	height: 82vh;
+	line-height: 200%;
+	margin: auto;
+	margin-top:0px;
+	background-color: #fff;
+}
+.shiri{
+	color:#990066;
+}
+.anata{
+	color:#008000;
+}
+#results{
+	margin-top:10px;
+	padding:0 5px 0 5px;
+}
+
+#txt1{
+	padding:5px;
+	font-size:1.3em;
+	border:solid 1px #ccc;
+	width:680px;
+	margin-left:10px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	ime-mode:active;
+}
+@media only screen and (max-width:750px){ 
+	.inner {
+		width: 98%;
+	}
+	.header {
+		width: 98%;
+		font-size:110%;
+	}
+	#txt1{
+		width:75%;
+	}
+}
+@media only screen and (max-height:500px){ 
+	.inner {
+		height: 78vh;
+	}
+}
