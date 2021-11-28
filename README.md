@@ -4,5 +4,5 @@ JavaScriptのAjax通信でデータベースに接続し、マンガ、アニメ
 同じクイズが出る確率は非常に低いので何度でも楽しめます。<br>
 今後メディア芸術データベースのデータが増えれば、連動してクイズのネタもどんどん増えていきます。<br>
 すべてブラウザ上で動作するJavascriptのみで作られており、ユーザーのつぶやき情報は一切収集しませんので安心です。<br>
-## DEMO
+## デモサイト
 <a href="https://www.mirko.jp/mediaArtQuiz">https://www.mirko.jp/mediaArtQuiz</a>
