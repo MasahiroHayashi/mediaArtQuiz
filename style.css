@@ -1,5 +1,6 @@
 html {
-	word-break: break-all; /*リンクを強制改行する*/
+	/* word-break: break-all; /*リンクを強制改行する
+	word-break: normal;*/
 }
 body {
 	margin:0;
