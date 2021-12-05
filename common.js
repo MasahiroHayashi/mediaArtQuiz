@@ -10,6 +10,9 @@ function scroll(){
 	scrollPoint = scrollPoint + 100;		
 	document.getElementById("inner").scrollTop = scrollPoint;
 }
+
+let negativeMessage = 0 ;
+
 //通常時のメッセージ
 function normalMessage(str) {
 	str = hankanaToKana(str); //半角カナ→全角カナ
@@ -28,6 +31,18 @@ function normalMessage(str) {
 		}else{
 			resultStr += "<span class='shiri'>メデ美</span>：ちょっとまって、考えなおそうよ…　クイズしようよ…<br>" ;
 		}
+	}else if( str.match(/しりとり/) || str.match(/iritori/) || str.match(/シリトリ/) ){
+		if(randomT === 0){
+			resultStr += "<span class='shiri'>メデ美</span>：わたしだってしりとりくらいできるわよ<br>" ;
+		}else if(randomT === 1){
+			resultStr += "<span class='shiri'>メデ美</span>：法人しりとりは<a href='https://www.mirko.jp/shiritori/' target='_blank'>こっち</a>よ<br>" ;
+		}else if(randomT === 2){
+			resultStr += "<span class='shiri'>メデ美</span>：しりとりちゃうやん、クイズでしょ？<br>" 
+		}else if(randomT === 3){
+			resultStr += "<span class='shiri'>メデ美</span>：食べ物しりとりでもやる？　ひらがなで何か食べ物言ってみて<br>" ;
+		}else{
+			resultStr += "<span class='shiri'>メデ美</span>：<a href='https://www.mirko.jp/shiritori/' target='_blank'>Shirin</a> よりわたしのほうが美人よ　さあクイズしましょ<br>" ;
+		}
 	}else if( str =="きれい" ||  str =="綺麗" ||  str =="すてき" ||  str =="素敵" ||  str =="天使" ||  str =="てんし" ||  str =="すき" || str =="かわいい" || str =="可愛い" || str =="びじん" || str =="美人" || str =="うつくしい" || str =="美しい"  || str.match(/だいすき/) || str.match(/大好き/) ){
 		if(randomT === 0){
 			resultStr += "<span class='shiri'>メデ美</span>：ありがとー&#x1f495;<br>" ;
@@ -41,29 +56,38 @@ function normalMessage(str) {
 			resultStr += "<span class='shiri'>メデ美</span>：きゃーありがとう！大好き&#x1f495;<br>" ;
 		}
 	}else if( str == "ころす" ||  str == "殺す" || str == "しね" || str == "死ね" || str == "ばか" || str == "あほ" || str == "きらい" || str == "ぶす" || str == "ぶさいく" ){
-		if(randomT === 0){
-			resultStr += "<span class='shiri'>メデ美</span>：もうやめる。バイバイ<br>" ;
-		}else if(randomT === 1){
-			resultStr += "<span class='shiri'>メデ美</span>：もういい、やめる<br>" ;
-		}else if(randomT === 2){
-			resultStr += "<span class='shiri'>メデ美</span>：もうあんたとは遊ばない<br>" ;
-		}else if(randomT === 3){
-			resultStr += "<span class='shiri'>メデ美</span>：おまえこそ〇〇じゃ<br>" ;
+		if(negativeMessage == 0){
+			resultStr += "<span class='shiri'>メデ美</span>：それもう一回言ったら本気で怒るわよ<br>" ;
+			negativeMessage = 1;
 		}else{
-			resultStr += "<span class='shiri'>メデ美</span>：クイズやめる。おしまい。<br>" ;
-		}
-		document.getElementById("txt1").disabled = true;
-		//何回もストップしないと止まらない…
-		stopRepeat = 1; //リピートをストップ
-		stopRepeat = 1; //リピートをストップ
-		stopRepeat = 1; //リピートをストップ
-		setTimeout(function () {
+			if(randomT === 0){
+				resultStr += "<span class='shiri'>メデ美</span>：マジ怒った！　もうやめる。バイバイ<br>" ;
+			}else if(randomT === 1){
+				resultStr += "<span class='shiri'>メデ美</span>：もういい、やめる　さよなら<br>" ;
+			}else if(randomT === 2){
+				resultStr += "<span class='shiri'>メデ美</span>：もうあんたとは遊ばない　ふん<br>" ;
+			}else if(randomT === 3){
+				resultStr += "<span class='shiri'>メデ美</span>：おい、おまえこそ〇〇じゃ<br>" ;
+			}else{
+				resultStr += "<span class='shiri'>メデ美</span>：ふん、クイズやめる。おしまい。<br>" ;
+			}
+			setTimeout(function () {
+				document.getElementById("results").innerHTML = "メデ美が怒ったため終了しました"; 
+			}, "3000");
+			
+			document.getElementById("txt1").disabled = true;
+			//何回もストップしないと止まらない…
 			stopRepeat = 1; //リピートをストップ
-				setTimeout(function () {
-					stopRepeat = 1; //リピートをストップ
-				}, "50");
-		}, "50");
-		return;
+			stopRepeat = 1; //リピートをストップ
+			stopRepeat = 1; //リピートをストップ
+			setTimeout(function () {
+				stopRepeat = 1; //リピートをストップ
+					setTimeout(function () {
+						stopRepeat = 1; //リピートをストップ
+					}, "50");
+			}, "50");
+			return;
+		}
 	}else if(str == "メデ美" || str == "めでみ" || str == "medemi" || str == "MEDEMI" || str == "メデミ" ){
 		if(randomT === 0){
 			resultStr += "<span class='shiri'>メデ美</span>：呼んだ？<br>" ;
@@ -75,6 +99,18 @@ function normalMessage(str) {
 			resultStr += "<span class='shiri'>メデ美</span>：へーい！<br>" ;
 		}else{
 			resultStr += "<span class='shiri'>メデ美</span>：ほーい！<br>" ;
+		}	
+	}else if(str == "しりん" || str == "SHIRIN"  || str == "SIRIN" || str == "shirin" || str == "sirin" || str == "Shirin" || str == "Sirin" ){
+		if(randomT === 0){
+			resultStr += "<span class='shiri'>メデ美</span>：<a href='https://www.mirko.jp/shiritori/' target='_blank'>Shirin</a>ちゃうわ、メデ美や<br>" ;
+		}else if(randomT === 1){
+			resultStr += "<span class='shiri'>メデ美</span>：おい、わたしはメデ美やで　<a href='https://www.mirko.jp/shiritori/' target='_blank'>Shirin</a>は姉や<br>" ;
+		}else if(randomT === 2){
+			resultStr += "<span class='shiri'>メデ美</span>：<a href='https://www.mirko.jp/shiritori/' target='_blank'>Shirin</a>と間違うなんてあんたの目は節穴やな<br>" 
+		}else if(randomT === 3){
+			resultStr += "<span class='shiri'>メデ美</span>：<a href='https://www.mirko.jp/shiritori/' target='_blank'>Shirin</a>よりもあたしのほうが1ペタ倍かわいいわ<br>" ;
+		}else{
+			resultStr += "<span class='shiri'>メデ美</span>：はい<a href='https://www.mirko.jp/shiritori/' target='_blank'>Shirin</a>でーす！　ってギャグやらせんなや<br>" ;
 		}			
 	}else if(str == "" || str == " " || str == "  " || str == "   " || str == "    " || str == "      " || str == "　" || str == "　　" || str == "　　　" || str == "　　　　" || str == "　　　　　"){
 		if(randomT === 0){
