@@ -6,3 +6,5 @@ JavaScriptのAjax通信でデータベースに接続し、マンガ、アニメ
 すべてブラウザ上で動作するJavascriptのみで作られており、ユーザーの入力情報は一切収集しませんのでセキュリティ的にも安心です。<br>
 ## デモサイト
 <a href="https://www.mirko.jp/mediaArtQuiz">https://www.mirko.jp/mediaArtQuiz</a>
+## アプリで用いているSPARQLクエリの解説
+<a href="https://mirko7.blogspot.com/2021/12/sparql.html">https://mirko7.blogspot.com/2021/12/sparql.html</a>
