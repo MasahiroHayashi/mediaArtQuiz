@@ -12,7 +12,7 @@ function getMaxNumForManga() {
         query += 'PREFIX schema: <https://schema.org/> ';
         query += 'SELECT (count(?s) as ?count) ';
         query += 'WHERE { ';
-        query += '?s schema:genre "単行本全巻" ; ';
+        query += '?s schema:genre "マンガ単行本シリーズ" ; ';
         query += 'rdfs:label ?name ; ';
         query += 'schema:creator  ?creator ; ';
         query += 'schema:datePublished  ?time ; ';
@@ -83,7 +83,7 @@ function get20manga( random ) {
         query += 'PREFIX schema: <https://schema.org/> ';
         query += 'SELECT * ';
         query += 'WHERE { ';
-        query += '?s schema:genre "単行本全巻" ; ';
+        query += '?s schema:genre "マンガ単行本シリーズ" ; ';
         query += 'rdfs:label ?name ; ';
         query += 'schema:creator  ?creator ; ';
         query += 'schema:datePublished  ?time ; ';

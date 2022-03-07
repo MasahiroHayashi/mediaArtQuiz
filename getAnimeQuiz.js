@@ -13,7 +13,7 @@ function getMaxNumForAnime() {
         query += 'PREFIX ma: <https://mediaarts-db.bunka.go.jp/data/property/> ';
         query += 'SELECT (count(?s) as ?count) ';
         query += 'WHERE { ';
-        query += '?s schema:genre "テレビレギュラーアニメシリーズ" ; ';
+        query += '?s schema:genre "アニメテレビレギュラーシリーズ" ; ';
         query += 'rdfs:label ?name ; ';
         query += 'schema:productionCompany ?productionCompany  ; ';
         query += 'schema:actor ?actor  ; ';
@@ -81,7 +81,7 @@ function get20anime( random ) {
         query += 'PREFIX ma: <https://mediaarts-db.bunka.go.jp/data/property/> ';
         query += 'SELECT * ';
         query += 'WHERE { ';
-        query += '?s schema:genre "テレビレギュラーアニメシリーズ" ; ';
+        query += '?s schema:genre "アニメテレビレギュラーシリーズ" ; ';
         query += 'rdfs:label ?name ; ';
         query += 'schema:productionCompany ?productionCompany  ; ';
         query += 'schema:actor ?actor  ; ';
